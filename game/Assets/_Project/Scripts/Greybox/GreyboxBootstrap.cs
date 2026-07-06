@@ -103,12 +103,24 @@ namespace BramblyHedge.Greybox
         void SetEnvironment()
         {
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.58f, 0.58f, 0.55f);
+            RenderSettings.ambientLight = new Color(0.62f, 0.62f, 0.58f);
             RenderSettings.fog = true;
             RenderSettings.fogColor = new Color(0.84f, 0.86f, 0.76f);   // warm haze
             RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogStartDistance = 35f;
-            RenderSettings.fogEndDistance = 110f;
+            RenderSettings.fogStartDistance = 40f;
+            RenderSettings.fogEndDistance = 130f;
+
+            // Gradient sky — with the low Near pitch the horizon is on screen, so it matters now.
+            var skyShader = Shader.Find("Skybox/Procedural");
+            if (skyShader != null)
+            {
+                var sky = new Material(skyShader);
+                sky.SetFloat("_Exposure", 1.15f);
+                sky.SetFloat("_AtmosphereThickness", 0.85f);
+                if (sky.HasProperty("_SkyTint")) sky.SetColor("_SkyTint", new Color(0.60f, 0.72f, 0.85f));
+                if (sky.HasProperty("_GroundColor")) sky.SetColor("_GroundColor", new Color(0.80f, 0.82f, 0.70f));
+                RenderSettings.skybox = sky;
+            }
 
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.name = "Ground";
@@ -125,6 +137,7 @@ namespace BramblyHedge.Greybox
             light.color = new Color(1f, 0.94f, 0.80f);      // warm morning
             light.intensity = 1.2f;
             light.shadows = LightShadows.Soft;
+            light.shadowStrength = 0.72f; // watercolour shadows are tinted, never black
             go.transform.rotation = Quaternion.Euler(44f, 100f, 0f); // raking side light
         }
 
@@ -186,8 +199,8 @@ namespace BramblyHedge.Greybox
                 cam = go.AddComponent<Camera>();
                 go.AddComponent<AudioListener>();
             }
-            cam.backgroundColor = new Color(0.84f, 0.86f, 0.76f); // matches the fog → seamless haze horizon
-            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.84f, 0.86f, 0.76f); // fallback if no skybox shader
+            cam.clearFlags = RenderSettings.skybox != null ? CameraClearFlags.Skybox : CameraClearFlags.SolidColor;
             cam.nearClipPlane = 0.05f;
 
             var rig = cam.GetComponent<StorybookCameraRig>();
@@ -485,6 +498,26 @@ namespace BramblyHedge.Greybox
             var m = new Material(Lit());
             if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
             if (m.HasProperty("_Color")) m.SetColor("_Color", c);
+
+            // Fully matte: kill specular highlights and reflections — the glossy plastic
+            // sheen is what makes primitives read "3D program" instead of "picture book".
+            if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", 0f);
+            if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0f);
+            if (m.HasProperty("_SpecularHighlights"))
+            {
+                m.SetFloat("_SpecularHighlights", 0f);
+                m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+            }
+            if (m.HasProperty("_GlossyReflections"))
+            {
+                m.SetFloat("_GlossyReflections", 0f);
+                m.EnableKeyword("_GLOSSYREFLECTIONS_OFF");
+            }
+            if (m.HasProperty("_EnvironmentReflections"))
+            {
+                m.SetFloat("_EnvironmentReflections", 0f);
+                m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+            }
             return m;
         }
 

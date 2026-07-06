@@ -81,7 +81,7 @@ namespace BramblyHedge.Greybox
             GUILayout.Label($"Time of day:  <b>{clock}</b>", _line);
 
             if (rig != null)
-                GUILayout.Label($"Camera:  yaw <b>{rig.YawDegrees}°</b>   zoom <b>{rig.ZoomBandName}</b>", _line);
+                GUILayout.Label($"Camera:  yaw <b>{rig.YawDegrees}°</b>   pitch <b>{rig.PitchDegrees}°</b>   zoom <b>{rig.ZoomBandName}</b>", _line);
 
             GUILayout.Space(8);
             GUILayout.Label("<b>Controls</b>", _line);

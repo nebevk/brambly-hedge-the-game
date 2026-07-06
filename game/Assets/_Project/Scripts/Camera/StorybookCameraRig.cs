@@ -20,8 +20,9 @@ namespace BramblyHedge.CameraRig
         [Tooltip("Position smoothing time (seconds). Gentle, never abrupt.")]
         public float followSmooth = 0.18f;
 
-        [Header("Framing (D3 spec)")]
-        [Range(22f, 45f)] public float pitch = 38f;
+        [Header("Framing")]
+        [Tooltip("Pitch per zoom band (Near/Default/Vista). Low at Near = the lateral 'book plate' view where the world towers; higher pulled back = gameplay readability. EXPERIMENT pending a D3 update — D3's original spec was a fixed 38°.")]
+        public float[] zoomPitches = { 20f, 29f, 38f };
         [Range(22f, 35f)] public float fieldOfView = 28f;
 
         [Header("Yaw — 8 × 45° snaps")]
@@ -38,10 +39,15 @@ namespace BramblyHedge.CameraRig
         float _yaw, _yawVel;         // current smoothed yaw
         int _yawIndex;
         float _distance, _distanceVel;
+        float _pitch, _pitchVel;
         int _zoomIndex;
 
         public int YawDegrees => Mathf.RoundToInt(Mathf.Repeat(_yawIndex * 45f, 360f));
+        public int PitchDegrees => Mathf.RoundToInt(_pitch);
         public string ZoomBandName => _zoomIndex == 0 ? "Near" : _zoomIndex == 1 ? "Default" : "Vista";
+
+        float PitchFor(int zoomIndex) =>
+            zoomPitches[Mathf.Clamp(zoomIndex, 0, zoomPitches.Length - 1)];
 
         void Awake()
         {
@@ -53,6 +59,7 @@ namespace BramblyHedge.CameraRig
             _zoomIndex = Mathf.Clamp(startZoomIndex, 0, zoomDistances.Length - 1);
             _yaw = _yawIndex * 45f;
             _distance = zoomDistances[_zoomIndex];
+            _pitch = PitchFor(_zoomIndex);
             if (target != null) _focus = target.position + Vector3.up * focusHeight;
         }
 
@@ -89,7 +96,9 @@ namespace BramblyHedge.CameraRig
             _distance = Mathf.SmoothDamp(_distance, zoomDistances[_zoomIndex],
                                          ref _distanceVel, 0.2f);
 
-            Quaternion rot = Quaternion.Euler(pitch, _yaw, 0f);
+            _pitch = Mathf.SmoothDamp(_pitch, PitchFor(_zoomIndex), ref _pitchVel, 0.25f);
+
+            Quaternion rot = Quaternion.Euler(_pitch, _yaw, 0f);
             Vector3 pos = _focus - (rot * Vector3.forward) * _distance;
             transform.SetPositionAndRotation(pos, rot);
             _cam.fieldOfView = fieldOfView;
