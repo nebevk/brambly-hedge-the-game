@@ -27,10 +27,10 @@ namespace BramblyHedge.CameraRig
         [Header("Yaw — 8 × 45° snaps")]
         [Tooltip("Approx. seconds for a 45° turn to settle (D3: ~0.35s smoothstep).")]
         public float yawTween = 0.35f;
-        [Range(0, 7)] public int startYawIndex = 1; // 45° = a three-quarter view
+        [Range(0, 7)] public int startYawIndex = 0; // face north — the hedge/oak backdrop
 
         [Header("Zoom bands — Near / Default / Vista (build units)")]
-        public float[] zoomDistances = { 6f, 10f, 16f };
+        public float[] zoomDistances = { 5.5f, 9f, 15f };
         [Range(0, 2)] public int startZoomIndex = 1;
 
         Camera _cam;

@@ -46,6 +46,9 @@ crashlytics-build.properties
 *.unitypackage
 *.app
 
+# Greybox screenshot plates (F12 in play mode)
+game/Screenshots/
+
 # OS
 .DS_Store
 .DS_Store?

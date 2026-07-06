@@ -8,13 +8,36 @@ namespace BramblyHedge.Greybox
     /// Minimal on-screen readout so the greybox is visibly "alive": the game clock,
     /// the camera's snapped yaw and zoom band, and the controls. This is a debug
     /// overlay, not the shipping UI (the real UI is the Journal — see 17-ui-philosophy.md).
+    ///
+    /// H hides the panel (for judging composition); F12 saves a screenshot to
+    /// game/Screenshots/ — the greybox version of the "book plate" test.
     /// </summary>
     public class GreyboxHUD : MonoBehaviour
     {
         public StorybookCameraRig rig;
 
+        bool _hidden;
+        float _savedFlash;
+        string _savedName;
+
         GUIStyle _panel, _title, _line;
         Texture2D _bg;
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.H)) _hidden = !_hidden;
+
+            if (Input.GetKeyDown(KeyCode.F12))
+            {
+                System.IO.Directory.CreateDirectory("Screenshots");
+                _savedName = $"Screenshots/plate_{System.DateTime.Now:yyyyMMdd_HHmmss}.png";
+                ScreenCapture.CaptureScreenshot(_savedName, 2); // 2x supersize for crisp plates
+                _savedFlash = 3f;
+                Debug.Log($"[Brambly] Saved {_savedName}");
+            }
+
+            if (_savedFlash > 0f) _savedFlash -= Time.unscaledDeltaTime;
+        }
 
         void EnsureStyles()
         {
@@ -41,8 +64,13 @@ namespace BramblyHedge.Greybox
         {
             EnsureStyles();
 
-            const float w = 320f;
-            float h = 168f;
+            if (_savedFlash > 0f && _savedName != null)
+                GUI.Label(new Rect(12, Screen.height - 34, 600, 24), $"Saved  {_savedName}", _line);
+
+            if (_hidden) return;
+
+            const float w = 330f;
+            float h = 236f;
             GUI.Box(new Rect(12, 12, w, h), GUIContent.none, _panel);
             GUILayout.BeginArea(new Rect(24, 22, w - 24, h - 12));
 
@@ -61,6 +89,8 @@ namespace BramblyHedge.Greybox
             GUILayout.Label("Shift — scamper (run)", _line);
             GUILayout.Label("Q / E — rotate camera 45°", _line);
             GUILayout.Label("Mouse wheel or [ ] — zoom band", _line);
+            GUILayout.Label("R — regenerate hedgerow   H — hide panel", _line);
+            GUILayout.Label("F12 — save screenshot plate", _line);
 
             GUILayout.EndArea();
         }

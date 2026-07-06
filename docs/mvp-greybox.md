@@ -20,8 +20,15 @@ It uses **no extra packages** (no Cinemachine) and builds its own scene at runti
 | **Shift** | Scamper (run) |
 | **Q / E** | Rotate the camera by 45° (8 snapped angles) |
 | **Mouse wheel** or **[** / **]** | Change zoom band (Near / Default / Vista) |
+| **R** | Regenerate the hedgerow scatter with a new seed |
+| **H** | Hide/show the debug panel (for judging composition) |
+| **F12** | Save a 2× screenshot to `game/Screenshots/` — the greybox "book plate" test |
 
 The on-screen panel shows the game clock, the camera's snapped yaw, and the current zoom band, so you can see the systems are live.
+
+## The greybox hedgerow layout
+
+The scene is laid out per [05-world.md](./gdd/05-world.md) so the camera always has something to compose against: a **hedge wall** to the north with a gap the worn **path** leads to, a **cornfield** peeking over the hedge, the **stream** with a broken plank crossing to the south (foreshadowing the slice's bridge project), two **hero trees** framing the shot, the **Old Oak mega-landmark** on the horizon (the no-minimap wayfinding anchor), bramble bushes with berries, clustered grass and flowers, and a **distant forest ring** fading into warm haze. Judge the camera on the **Default/Near** zoom bands — Vista is deliberately the pulled-back landscape view.
 
 ## What it demonstrates (the Step-1 checklist)
 
